@@ -42,7 +42,40 @@ class ProductFactory:
     ) -> ProductRFRSwap:
 
         #TODO
-        pass
+        first, second = cls._tokenize_axis1(axis1)
+        convention = data_convention
+
+        if second is None:
+            effective_date = value_date
+            term_or_termination_date = first
+        else:
+            effective_date = (
+                add_period(
+                    value_date,
+                    first.get_term(),
+                    convention.business_day_convention,
+                    convention.holiday_convention,
+                )
+                if first.is_term()
+                else first.get_date()
+            )
+            term_or_termination_date = second
+
+        return ProductRFRSwap(
+            effective_date=effective_date,
+            term_or_termination_date=term_or_termination_date,
+            payment_off_set=convention.payment_offset,
+            on_index=convention.index_str,
+            fixed_rate=values,
+            pay_or_rec=PayOrReceive.from_string(kwargs.get("pay_or_rec", "receive")),
+            notional=kwargs.get("notional", 1e4),
+            accrual_period=convention.acc_period,
+            accrual_basis=convention.acc_basis,
+            floating_leg_accrual_period=convention.acc_period,
+            pay_business_day_convention=convention.business_day_convention,
+            pay_holiday_convention=convention.holiday_convention,
+            compounding_method=convention.compounding_method,
+        )
 
     @classmethod
     def create_overnight_index_basis_swap(
@@ -55,7 +88,41 @@ class ProductFactory:
     ) -> ProductOvernightIndexBasisSwap:
 
         #TODO
-        pass
+        first, second = cls._tokenize_axis1(axis1)
+        convention = data_convention
+
+        if second is None:
+            effective_date = value_date
+            term_or_termination_date = first
+        else:
+            effective_date = (
+                add_period(
+                    value_date,
+                    first.get_term(),
+                    convention.business_day_convention,
+                    convention.holiday_convention,
+                )
+                if first.is_term()
+                else first.get_date()
+            )
+            term_or_termination_date = second
+
+        return ProductOvernightIndexBasisSwap(
+            effective_date=effective_date,
+            term_or_termination_date=term_or_termination_date,
+            payment_off_set=convention.payment_offset,
+            on_index_1=convention.index_1_str,
+            on_index_2=convention.index_2_str,
+            spread_over_leg_1=values,
+            pay_or_rec_leg_1=PayOrReceive.from_string(kwargs.get("pay_or_rec", "receive")),
+            notional=kwargs.get("notional", 1e4),
+            accrual_period_1=convention.acc_period_1,
+            accrual_basis=convention.acc_basis,
+            accrual_period_2=convention.acc_period_2,
+            pay_business_day_convention=convention.business_day_convention,
+            pay_holiday_convention=convention.holiday_convention,
+            compounding_method=convention.compounding_method,
+        )
 
     @classmethod
     def create_fra(cls, value_date, axis1, data_convention, values, **kwargs):
